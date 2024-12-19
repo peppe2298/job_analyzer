@@ -1,5 +1,10 @@
 import pandas as pd
 
+from job_examinator import State
+from model import SoftSkill, Category
+from prompts import soft_skill_match
+
+
 def separa_luogo(row) -> [str, str, str]:
     valori = row['Luogo'].split(',')
     if len(valori) == 3:
@@ -22,3 +27,36 @@ def get_jobs() -> pd.DataFrame:
     df.drop('Livello', axis=1, inplace=True)
 
     return df
+
+def cast_job_to_serie(job: State) -> pd.Series:
+    serie: pd.Series = pd.Series()
+
+    serie['name'] = job['name'] if 'name' in job else ''
+    serie['company'] = job['company'] if 'company' in job else ''
+    serie['type'] = job['type'] if 'type' in job else ''
+    serie['city'] = job['city'] if 'city' in job else ''
+    serie['region'] = job['region'] if 'region' in job else ''
+    serie['state'] = job['state'] if 'state' in job else ''
+    serie['contract_type'] = job['contract_type'] if 'name' in job else ''
+
+    soft_skills: set[SoftSkill] = job['soft_skills']
+
+    for soft_skill in soft_skills:
+        soft_skill_name = soft_skill.name
+        serie[soft_skill_name] = soft_skill.required
+
+    categories: set[Category] = job['categories']
+
+    for category in categories:
+        category_name = category.name
+        serie[category_name] = category.required
+
+    for category in categories:
+        if category.hard_skills is None:
+            continue
+        for skill in category.hard_skills:
+            hard_skill_name = skill.name
+            serie[hard_skill_name] = skill.required
+
+
+    return serie

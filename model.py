@@ -6,6 +6,14 @@ class Field:
         self.name = name
         self.required = required
 
+    def __eq__(self, other):
+        if isinstance(other, Field):
+            return self.name == other.name
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self.name)
+
 class HardSkill(Field):
     pass
 
