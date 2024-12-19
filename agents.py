@@ -4,7 +4,7 @@ from langchain_core.output_parsers import CommaSeparatedListOutputParser
 from langchain_core.runnables import Runnable, RunnableParallel
 from langchain_ollama import OllamaLLM
 
-from prompts import contract_level_prompt, skills_prompt, check_category_prompt, hard_skill_match
+from prompts import contract_level_prompt, skills_prompt, check_category_prompt, hard_skill_match, soft_skill_match
 
 
 def job_preprocess_agent() -> Runnable:
@@ -41,3 +41,13 @@ def hard_skill_match_agent() -> Runnable:
     llm = OllamaLLM(model="gemma2", temperature=0)
 
     return hard_skill_match | llm | output_parser
+
+
+def soft_skill_match_agent() -> Runnable:
+
+    # Output parser per la lista separata da virgole
+    output_parser = CommaSeparatedListOutputParser()
+
+    llm = OllamaLLM(model="gemma2", temperature=0)
+
+    return soft_skill_match | llm | output_parser

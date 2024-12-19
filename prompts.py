@@ -75,3 +75,24 @@ Lista delle skill da verificare (usa ESATTAMENTE questi nomi):
 
 Skill richieste (una per riga):
 """)
+
+soft_skill_match = ChatPromptTemplate.from_template("""
+Analizza il seguente annuncio di lavoro e identifica quali delle soft skill fornite sono richieste.
+IMPORTANTE: Se trovi una skill richiesta che ha un nome diverso ma si riferisce alla stessa tecnologia presente nella lista fornita, 
+devi restituire il nome ESATTO presente nella lista di input.
+
+Ad esempio:
+- Se nella lista c'è "Leadership e Influenza" e nell'annuncio trovi "Capacità di influenzare gli altri" o "possesso di leadership", restituisci "React.js"
+- Se nella lista c'è "Team Collaboration e Teamwork" e nell'annuncio trovi "Capacità di lavorare in team", restituisci "Team Collaboration e Teamwork"
+
+Restituisci SOLO le skill richieste, una per riga.
+Se una skill non è chiaramente richiesta, non includerla.
+
+Annuncio di lavoro:
+{job_description}
+
+Lista delle soft skill da verificare (usa ESATTAMENTE questi nomi):
+{skills}
+
+Skill richieste (una per riga):
+""")

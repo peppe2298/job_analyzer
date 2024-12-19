@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 
 class Field:
@@ -81,3 +81,26 @@ job_sectors = {
         ]
     )
 }
+
+# Definizione delle reference skills
+job_soft_skills : list[str] = [
+    'Problem Solving e Pensiero Analitico',
+    'Comunicazione Tecnica e Business',
+    'Team Collaboration e Teamwork',
+    'Leadership e Influenza',
+    'Time Management e Organizzazione',
+    'Continuous Learning',
+    'Technical Writing e Documentation',
+    'Cross-functional Collaboration',
+    'Mentoring e Coaching',
+    'Pensiero Critico',
+    'Resilienza e Gestione dello Stress',
+    'Creatività e Innovazione',
+    'Cultural Awareness e Diversity',
+    'Etica Professionale',
+    'Gestione delle Priorità',
+    'Autoconsapevolezza',
+    'Public Speaking',
+    'Capacità di Sintesi',
+    'Decision Making',
+]

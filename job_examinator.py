@@ -6,8 +6,8 @@ from langgraph.graph.state import CompiledStateGraph
 from typing_extensions import TypedDict, Literal
 from langgraph.graph import StateGraph, START, END
 
-from agents import job_preprocess_agent, check_category_agent, hard_skill_match_agent
-from model import Category, SoftSkill, HardSkill, job_sectors
+from agents import job_preprocess_agent, check_category_agent, hard_skill_match_agent, soft_skill_match_agent
+from model import Category, SoftSkill, HardSkill, job_sectors, job_soft_skills
 
 
 class State(TypedDict):
@@ -35,9 +35,9 @@ def preprocess_level(state: State) -> State:
     state['type'] = result["contract_info"][0]
     state['contract_type'] = result["contract_info"][1]
     state['summarized_announce'] = result["skills"]
-
-    print("Contratto e Livello:", result["contract_info"])
-    print("\nSkill richieste:\n", result["skills"])
+    #
+    # print("Contratto e Livello:", result["contract_info"])
+    # print("\nSkill richieste:\n", result["skills"])
 
 
     return state
@@ -57,7 +57,7 @@ def check_category(state: State, category: str) -> State:
     category = Category(category, category_dict[0], required=required)
     state['categories'].append(category)
 
-    return State
+    return state
 
 def check_hard_skill(state: State, category_name: str) -> State:
 
@@ -81,25 +81,37 @@ def check_hard_skill(state: State, category_name: str) -> State:
 
     category.hard_skills = hard_skills
 
-    return State
+    return state
 
 
 def check_soft_skill(state: State) -> State:
 
-    #TODO IMPLEMENTARE AGENTE
-    
-    soft_skill: list[SoftSkill] = []
-    state['soft_skill'] = soft_skill
+    soft_skill_agent = soft_skill_match_agent()
+    soft_skill_matched = soft_skill_agent.invoke({
+        "job_description": state['summarized_announce'],
+        "skills": ", ".join(job_soft_skills)
+    })
 
-    return State
+
+    soft_skills: list[SoftSkill] = []
+
+    for soft_skill_name in job_soft_skills:
+        soft_skill = SoftSkill(soft_skill_name)
+        soft_skill.required = soft_skill_name in soft_skill_matched
+        soft_skills.append(soft_skill)
+
+
+    state['soft_skill'] = soft_skills
+
+    return state
 
 def should_check_hard_skill(state: State, category_name: str) -> str:
 
     categories = state['categories']
-    category: Category = next(ca for ca in categories if ca.extended_name == category_name)
+    category: Category = next(ca for ca in categories if ca.name == category_name)
 
     if category.required:
-        return f'check_hard_skill_{category}'
+        return f'check_hard_skill_{category_name}'
 
     return END
 
