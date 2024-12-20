@@ -96,3 +96,26 @@ Lista delle soft skill da verificare (usa ESATTAMENTE questi nomi):
 
 Skill richieste (una per riga):
 """)
+
+ral_prompt = ChatPromptTemplate.from_template("""
+Dato il seguente annuncio di lavoro, calcola la RAL (Retribuzione Annua Lorda) seguendo queste regole:
+1. **Range di valori**: Se è presente un range (esempio: "25.000-30.000€"), calcola la media e restituisci un numero intero.
+2. **Valore unico**: Se è indicato un valore singolo (esempio: "35.000€"), restituisci quel valore come intero.
+3. **Retribuzione mensile**: Se è presente una retribuzione mensile (esempio: "1.500€ al mese"), calcola la RAL moltiplicando per 14 (14 mensilità) e restituisci il risultato come intero.
+4. **Nessun valore**: Se non trovi alcuna indicazione relativa alla RAL o alla retribuzione, restituisci `0`.
+
+Assicurati che l'output sia **solo un numero intero**, senza spiegazioni aggiuntive.
+
+**Esempi**:
+1. Input: "L'azienda X ricerca un Data Scientist. Offriamo una RAL compresa tra 25.000€ e 30.000€ in base all'esperienza."
+   Output: 27500
+2. Input: "L'azienda Y cerca un Web Developer con una retribuzione mensile di 1.800€."
+   Output: 25200
+3. Input: "L'azienda Z cerca un Project Manager. Ottime prospettive di crescita."
+   Output: 0
+
+**Annuncio**: {job_posting}
+
+**Risultato**:
+"""
+)

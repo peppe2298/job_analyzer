@@ -17,9 +17,11 @@ def update_set(right: set[Field], left: list[Field]):
 class State(TypedDict):
     name: str
     company: str
+    work_mode: str
     type: Literal['junior', 'mid-level', 'senior']
     city: str
     region: str
+    ral: int
     state:  str
     contract_type: Literal['stage', 'determinato', 'indeterminato']
     announce: str
@@ -33,12 +35,12 @@ def preprocess_level(state: State) -> State:
     """Nodo iniziale che processa lo stato in ingresso e apporta le modifiche comuni a tutte le categorie"""
 
     agent = job_preprocess_agent()
-
     result = agent.invoke({"job_posting": state['announce']})
 
     state['type'] = result["contract_info"][0]
     state['contract_type'] = result["contract_info"][1]
     state['summarized_announce'] = result["skills"]
+    state['ral'] = result["ral"]
     #
     # print("Contratto e Livello:", result["contract_info"])
     # print("\nSkill richieste:\n", result["skills"])

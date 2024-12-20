@@ -1,7 +1,7 @@
 import pandas as pd
 
 from job_examinator import State
-from model import SoftSkill, Category
+from model import SoftSkill, Category, job_sectors
 from prompts import soft_skill_match
 
 
@@ -33,6 +33,7 @@ def cast_job_to_serie(job: State) -> pd.Series:
 
     serie['name'] = job['name'] if 'name' in job else ''
     serie['company'] = job['company'] if 'company' in job else ''
+    serie['ral'] = job['ral'] if 'ral' in job else 0
     serie['type'] = job['type'] if 'type' in job else ''
     serie['city'] = job['city'] if 'city' in job else ''
     serie['region'] = job['region'] if 'region' in job else ''
@@ -47,16 +48,24 @@ def cast_job_to_serie(job: State) -> pd.Series:
 
     categories: set[Category] = job['categories']
 
+    other_category: bool = True
+
     for category in categories:
+
         category_name = category.name
         serie[category_name] = category.required
 
-    for category in categories:
-        if category.hard_skills is None:
+        if category.required:
+            other_category = False
+            for skill in category.hard_skills:
+                hard_skill_name = skill.name
+                serie[hard_skill_name] = skill.required
             continue
-        for skill in category.hard_skills:
-            hard_skill_name = skill.name
-            serie[hard_skill_name] = skill.required
 
+        for skill_name in job_sectors[category_name][2]:
+            hard_skill_name = skill_name
+            serie[hard_skill_name] = False
+
+        serie['Altro Settore'] = other_category
 
     return serie
