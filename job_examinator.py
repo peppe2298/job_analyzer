@@ -1,12 +1,13 @@
 import operator
-from typing import Annotated, Any
-
+from typing import Annotated
 
 from langgraph.graph.state import CompiledStateGraph
-from typing_extensions import TypedDict, Literal
+from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 
-from agents import job_preprocess_agent, check_category_agent, hard_skill_match_agent, soft_skill_match_agent
+
+from agents import job_preprocess_agent, check_category_agent, hard_skill_match_agent, soft_skill_match_agent, \
+    check_company_agent
 from model import Category, SoftSkill, HardSkill, job_sectors, job_soft_skills, Field
 
 
@@ -15,19 +16,27 @@ def update_set(right: set[Field], left: list[Field]):
     return right
 
 class State(TypedDict):
+    id: str
     name: str
     company: str
+    company_sector: str #AI
+    company_revenue: str #AI
+    company_registered_office_state: str #AI
     work_mode: str
-    type: Literal['junior', 'mid-level', 'senior']
+    work_type: str
+    experience: str
     city: str
     region: str
-    ral: int
     state:  str
-    contract_type: Literal['stage', 'determinato', 'indeterminato']
+    macro_region: str
+    job_sector: str
+    job_area: str
+    qualification: str
     announce: str
-    summarized_announce: str
-    categories: Annotated[set[Category], update_set]
-    soft_skills: Annotated[set[SoftSkill], update_set]
+    ral: int #AI
+    summarized_announce: str #AI
+    categories: Annotated[set[Category], update_set] #AI
+    soft_skills: Annotated[set[SoftSkill], update_set] #AI
 
 
 # Nodo di ingresso
@@ -37,14 +46,10 @@ def preprocess_level(state: State) -> State:
     agent = job_preprocess_agent()
     result = agent.invoke({"job_posting": state['announce']})
 
-    state['type'] = result["contract_info"][0]
-    state['contract_type'] = result["contract_info"][1]
+    print(result)
+
     state['summarized_announce'] = result["skills"]
     state['ral'] = result["ral"]
-    #
-    # print("Contratto e Livello:", result["contract_info"])
-    # print("\nSkill richieste:\n", result["skills"])
-
 
     return state
 
@@ -120,6 +125,15 @@ def should_check_hard_skill(state: State, category_name: str) -> str:
 
     return END
 
+
+
+def check_company(state: State):
+    agent = check_company_agent()
+
+    results = agent.invoke(state['company'])
+
+    return {'company_registered_office_state': results['nation'], 'company_sector': results['sectors'], 'company_revenue': results['revenue']}
+
 def get_graph() -> CompiledStateGraph:
 
     builder = StateGraph(State)
@@ -127,6 +141,8 @@ def get_graph() -> CompiledStateGraph:
     #CREAZIONE DEI NODI
     
     builder.add_node("preprocess_level", preprocess_level)
+
+    builder.add_node("check_company", check_company)
     
     builder.add_node("check_soft_skill", check_soft_skill)
     
@@ -151,6 +167,9 @@ def get_graph() -> CompiledStateGraph:
     builder.add_edge('preprocess_level', 'check_soft_skill')
     builder.add_edge("check_soft_skill", END)
 
+    builder.add_edge('preprocess_level', 'check_company')
+    builder.add_edge("check_company", END)
+
     builder.add_edge('preprocess_level', 'check_category_sistemi')
     builder.add_edge('preprocess_level', 'check_category_database')
     builder.add_edge('preprocess_level', 'check_category_management')
@@ -158,12 +177,12 @@ def get_graph() -> CompiledStateGraph:
     builder.add_edge('preprocess_level', 'check_category_data_science')
     builder.add_edge('preprocess_level', 'check_category_sviluppo_software')
 
-    builder.add_conditional_edges('check_category_sistemi', lambda s: should_check_hard_skill(s, 'sistemi'))
-    builder.add_conditional_edges('check_category_database', lambda s: should_check_hard_skill(s, 'database'))
-    builder.add_conditional_edges('check_category_management', lambda s: should_check_hard_skill(s, 'management'))
-    builder.add_conditional_edges('check_category_ux_designer', lambda s: should_check_hard_skill(s, 'ux_designer'))
-    builder.add_conditional_edges('check_category_data_science', lambda s: should_check_hard_skill(s, 'data_science'))
-    builder.add_conditional_edges('check_category_sviluppo_software', lambda s: should_check_hard_skill(s, 'sviluppo_software'))
+    builder.add_conditional_edges('check_category_sistemi', lambda s: should_check_hard_skill(s, 'sistemi'), path_map=["check_hard_skill_sistemi", "__end__"])
+    builder.add_conditional_edges('check_category_database', lambda s: should_check_hard_skill(s, 'database'), path_map=["check_hard_skill_database", "__end__"])
+    builder.add_conditional_edges('check_category_management', lambda s: should_check_hard_skill(s, 'management'), path_map=["check_hard_skill_management", "__end__"])
+    builder.add_conditional_edges('check_category_ux_designer', lambda s: should_check_hard_skill(s, 'ux_designer'), path_map=["check_hard_skill_ux_designer", "__end__"])
+    builder.add_conditional_edges('check_category_data_science', lambda s: should_check_hard_skill(s, 'data_science'), path_map=["check_hard_skill_data_science", "__end__"])
+    builder.add_conditional_edges('check_category_sviluppo_software', lambda s: should_check_hard_skill(s, 'sviluppo_software'), path_map=["check_hard_skill_sviluppo_software", "__end__"])
     
     builder.add_edge("check_hard_skill_sistemi", END)
     builder.add_edge("check_hard_skill_database", END)

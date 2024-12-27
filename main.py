@@ -15,8 +15,6 @@ def start_job_analyzer():
 
     jobs = get_jobs()
 
-    # job_selection = jobs.iloc[:1]
-
     graph = get_graph()
     image_data = BytesIO(graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API))
     image = Image.open(image_data)
@@ -25,21 +23,37 @@ def start_job_analyzer():
     jobs_elaborated = pd.DataFrame()
 
     for index, job in jobs.iterrows():
+
         result_state = State()
-        result_state['announce'] = job['Dettaglio']
-        result_state['name'] = job['Mansione'] if 'Mansione' in job else ''
-        result_state['company'] = job['Azienda'] if 'Azienda' in job else ''
-        result_state['city'] = job['Città'] if 'Città' in job else ''
-        result_state['region'] = job['Regione'] if 'Regione' in job else ''
-        result_state['state'] = job['Stato'] if 'Stato' in job else ''
-        result_state['work_mode'] = job['Tipo'] if 'Tipo' in job else ''
-        result_state= graph.invoke(result_state)
-        serie = cast_job_to_serie(result_state)
-        new_df = serie.to_frame().T
-        jobs_elaborated = pd.concat([jobs_elaborated, new_df], ignore_index=True)
+
+        result_state['id'] = job['id'] if 'id' in job else ''
+        result_state['announce'] = job['dettaglio'] if 'dettaglio' in job else ''
+        result_state['name'] = job['mansione'] if 'mansione' in job else ''
+        result_state['company'] = job['azienda'] if 'azienda' in job else ''
+        result_state['city'] = job['città'] if 'città' in job else ''
+        result_state['region'] = job['regione'] if 'regione' in job else ''
+        result_state['state'] = job['stato'] if 'stato' in job else ''
+        result_state['macro_region'] = job['macro_regione'] if 'macro_regione' in job else ''
+        result_state['work_mode'] = job['distanza'] if 'distanza' in job else ''
+        result_state['work_type'] = job['tipo_lavoro'] if 'tipo_lavoro' in job else ''
+        result_state['experience'] = job['livello_esperienza'] if 'livello_esperienza' in job else ''
+        result_state['job_sector'] = job['settore'] if 'settore' in job else ''
+        result_state['job_area'] = job['funzione_lavorativa'] if 'funzione_lavorativa' in job else ''
+        result_state['qualification'] = job['qualifica'] if 'qualifica' in job else ''
+
+        try:
+
+            result_state = graph.invoke(result_state)
+            serie = cast_job_to_serie(result_state)
+            new_df = serie.to_frame().T
+            jobs_elaborated = pd.concat([jobs_elaborated, new_df], ignore_index=True)
+
+        except Exception as e:
+            print(f'Lavoro {job["id"]} non importato: {str(e)}\n')
+
         print(f'{index} lavori processati')
 
-        if (index % 500) == 0:
+        if (index % 10) == 0:
             jobs_elaborated.to_csv('jobs_elaborated.csv', index=False)
 
     print(jobs_elaborated.head(10))
