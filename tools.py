@@ -13,7 +13,7 @@ def calcola_ral_da_netto(netto_mensile_paga) -> int:
         (50000, 0.35),        # Da 28.001 a 50.000 €: 35%
         (float('inf'), 0.43)  # Oltre 50.000 €: 43%
     ]
-
+    print("calcolo in corso")
     # Funzione per calcolare l'IRPEF lorda
     def calcola_irpef_lorda(reddito_lordo_annuo):
         imposta = 0

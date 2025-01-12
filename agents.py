@@ -1,9 +1,8 @@
 from typing import Tuple, Dict, Any
 
 from langchain.agents import initialize_agent, AgentType
-from langchain_community.tools import DuckDuckGoSearchRun
-from langchain_core.output_parsers import CommaSeparatedListOutputParser, BaseOutputParser, StrOutputParser, \
-    PydanticOutputParser
+from langchain_community.tools import DuckDuckGoSearchResults
+from langchain_core.output_parsers import CommaSeparatedListOutputParser, StrOutputParser, PydanticOutputParser
 from langchain_core.prompts import PromptTemplate, FewShotPromptTemplate
 from langchain_core.runnables import Runnable, RunnableParallel, RunnableLambda
 from langchain_core.tools import Tool
@@ -30,24 +29,27 @@ def job_preprocess_agent() -> Runnable:
     # Parser per l'output strutturato
     parser = PydanticOutputParser(pydantic_object=RALOutput)
 
+    # parser = JsonOutputParser()
+
     examples = [
         {
-            "job_posting": "Cerchiamo sviluppatore Java senior. RAL 45.000€ - 55.000€ in base all'esperienza.",
-            "output": """{ral: 50000, net_monthly: 0, confidence: 0.95}"""
+            "job_posting": """Cerchiamo sviluppatore Java senior. RAL 45.000€ - 55.000€ in base all'esperienza.""",
+            "output": """{{"ral": 50000, "net_monthly": 0, "confidence": 0.95}}"""
         },
         {
-            "job_posting": "Offriamo stipendio netto mensile di 2.200€ su 13 mensilità",
-            "output": """{ral: 0, net_monthly: 2200, confidence: 0.9}"""
+            "job_posting": """Offriamo stipendio netto mensile di 2.200€ su 13 mensilità""",
+            "output": """{{"ral": 0, "net_monthly": 2200, "confidence": 0.9}}"""
         },
         {
-            "job_posting": "La nostra azienda offre un ambiente stimolante e benefit aziendali",
-            "output": """{ral: 0, net_monthly: 0, confidence: 1.0}"""
+            "job_posting": """La nostra azienda offre un ambiente stimolante e benefit aziendali""",
+            "output": """{{"ral": 0, "net_monthly": 0, "confidence": 1.0}}"""
         }
     ]
 
     # Template per ogni esempio
-    example_template = """Annuncio: {job_posting}
-    Output: {output}"""
+    example_template = """Annuncio: {job_posting}\nOutput: {output}"""
+
+    # example_prompt = PromptTemplate.from_template(example_template)
 
     example_prompt = PromptTemplate(
         input_variables=["job_posting", "output"],
@@ -60,6 +62,8 @@ def job_preprocess_agent() -> Runnable:
     Se è presente un range (esempio: "25.000-30.000€"), restituisci la media tra i vari valori
     Se è presente solo lo stipendio netto mensile, segnalalo e estrai il valore.
     Se non sono presenti informazioni sulla retribuzione, ritorna 0 come RAL.
+    
+    Il risultato deve essere in formato JSON con i campi: ral, net_monthly, confidence
 
     Ecco alcuni esempi:"""
 
@@ -94,7 +98,7 @@ def job_preprocess_agent() -> Runnable:
             | (lambda x: calcola_ral_da_netto(x["net_monthly"]) if x.get("needs_conversion") else x["ral"])
     )
 
-    return RunnableParallel(kills = skills_chain, ral = ral_chain)
+    return RunnableParallel(skills = skills_chain, ral = ral_chain)
 
 def check_category_agent() -> Runnable:
     llm = OllamaLLM(model = "gemma2", temperature = 0)
@@ -113,17 +117,19 @@ def hard_skill_match_agent() -> Runnable:
 
 
 def check_company_agent() -> Runnable:
-    search_tool = DuckDuckGoSearchRun()
+    search_tool = DuckDuckGoSearchResults()
+
+    search_tool_revenue = DuckDuckGoSearchResults(output_format="json")
 
     llm = OllamaLLM(model="gemma2", temperature=0)
 
     def nation_headquarters(company_name):
         query = f"Semplicemente rispondi con il nome della nazione della sede legale di {company_name}, senza alcun altro testo."
-        return search_tool.run(query)
+        return search_tool.invoke(query)
 
     def company_revenue(company_name):
         query = f"Semplicemente rispondi il più recente fatturato disponibile di {company_name}, senza alcun altro testo."
-        return search_tool.run(query)
+        return search_tool_revenue.invoke(query)
 
     def company_sectors(company_name):
         sectors = [
@@ -136,7 +142,7 @@ def check_company_agent() -> Runnable:
             "Pubblica Amministrazione e No Profit"
         ]
         query = f"Verifica in quale dei seguenti settori opera {company_name}: {', '.join(sectors)}"
-        response = search_tool.run(query)
+        response = search_tool.invoke(query)
 
         # Filtra i settori che compaiono nella risposta
         matching_sectors = [sector for sector in sectors if sector.lower() in response.lower()]
@@ -145,7 +151,7 @@ def check_company_agent() -> Runnable:
     # Inizializzazione dell'agente per ogni tool
     agent_nation = initialize_agent(
         llm= llm,
-        tools=[Tool(name="nation_headquarters", func=nation_headquarters,
+        tools=[Tool(name="headquarter_nation", func=nation_headquarters,
                     description="Trova la nazione della sede legale")],
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True

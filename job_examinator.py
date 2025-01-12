@@ -1,10 +1,11 @@
 import operator
 from typing import Annotated
 
+from langchain.globals import set_debug, set_verbose
 from langgraph.graph.state import CompiledStateGraph
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
-
+from langchain.callbacks.tracers import ConsoleCallbackHandler
 
 from agents import job_preprocess_agent, check_category_agent, hard_skill_match_agent, soft_skill_match_agent, \
     check_company_agent
@@ -43,10 +44,11 @@ class State(TypedDict):
 def preprocess_level(state: State) -> State:
     """Nodo iniziale che processa lo stato in ingresso e apporta le modifiche comuni a tutte le categorie"""
 
-    agent = job_preprocess_agent()
-    result = agent.invoke({"job_posting": state['announce']})
+    set_debug(False)
+    set_verbose(False)
 
-    print(result)
+    agent = job_preprocess_agent()
+    result = agent.invoke(input={'job_posting': state['announce']})
 
     state['summarized_announce'] = result["skills"]
     state['ral'] = result["ral"]
@@ -177,12 +179,12 @@ def get_graph() -> CompiledStateGraph:
     builder.add_edge('preprocess_level', 'check_category_data_science')
     builder.add_edge('preprocess_level', 'check_category_sviluppo_software')
 
-    builder.add_conditional_edges('check_category_sistemi', lambda s: should_check_hard_skill(s, 'sistemi'), path_map=["check_hard_skill_sistemi", "__end__"])
-    builder.add_conditional_edges('check_category_database', lambda s: should_check_hard_skill(s, 'database'), path_map=["check_hard_skill_database", "__end__"])
-    builder.add_conditional_edges('check_category_management', lambda s: should_check_hard_skill(s, 'management'), path_map=["check_hard_skill_management", "__end__"])
-    builder.add_conditional_edges('check_category_ux_designer', lambda s: should_check_hard_skill(s, 'ux_designer'), path_map=["check_hard_skill_ux_designer", "__end__"])
-    builder.add_conditional_edges('check_category_data_science', lambda s: should_check_hard_skill(s, 'data_science'), path_map=["check_hard_skill_data_science", "__end__"])
-    builder.add_conditional_edges('check_category_sviluppo_software', lambda s: should_check_hard_skill(s, 'sviluppo_software'), path_map=["check_hard_skill_sviluppo_software", "__end__"])
+    builder.add_conditional_edges('check_category_sistemi', lambda s: should_check_hard_skill(s, 'sistemi'), path_map=["check_hard_skill_sistemi", END])
+    builder.add_conditional_edges('check_category_database', lambda s: should_check_hard_skill(s, 'database'), path_map=["check_hard_skill_database", END])
+    builder.add_conditional_edges('check_category_management', lambda s: should_check_hard_skill(s, 'management'), path_map=["check_hard_skill_management", END])
+    builder.add_conditional_edges('check_category_ux_designer', lambda s: should_check_hard_skill(s, 'ux_designer'), path_map=["check_hard_skill_ux_designer", END])
+    builder.add_conditional_edges('check_category_data_science', lambda s: should_check_hard_skill(s, 'data_science'), path_map=["check_hard_skill_data_science", END])
+    builder.add_conditional_edges('check_category_sviluppo_software', lambda s: should_check_hard_skill(s, 'sviluppo_software'), path_map=["check_hard_skill_sviluppo_software", END])
     
     builder.add_edge("check_hard_skill_sistemi", END)
     builder.add_edge("check_hard_skill_database", END)

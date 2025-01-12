@@ -24,22 +24,22 @@ def start_job_analyzer():
 
     for index, job in jobs.iterrows():
 
-        result_state = State()
-
-        result_state['id'] = job['id'] if 'id' in job else ''
-        result_state['announce'] = job['dettaglio'] if 'dettaglio' in job else ''
-        result_state['name'] = job['mansione'] if 'mansione' in job else ''
-        result_state['company'] = job['azienda'] if 'azienda' in job else ''
-        result_state['city'] = job['città'] if 'città' in job else ''
-        result_state['region'] = job['regione'] if 'regione' in job else ''
-        result_state['state'] = job['stato'] if 'stato' in job else ''
-        result_state['macro_region'] = job['macro_regione'] if 'macro_regione' in job else ''
-        result_state['work_mode'] = job['distanza'] if 'distanza' in job else ''
-        result_state['work_type'] = job['tipo_lavoro'] if 'tipo_lavoro' in job else ''
-        result_state['experience'] = job['livello_esperienza'] if 'livello_esperienza' in job else ''
-        result_state['job_sector'] = job['settore'] if 'settore' in job else ''
-        result_state['job_area'] = job['funzione_lavorativa'] if 'funzione_lavorativa' in job else ''
-        result_state['qualification'] = job['qualifica'] if 'qualifica' in job else ''
+        result_state = State(
+            id = job['id'] if 'id' in job else '',
+            announce = job['dettaglio'] if 'dettaglio' in job else '',
+            name = job['mansione'] if 'mansione' in job else '',
+            company = job['azienda'] if 'azienda' in job else '',
+            city = job['città'] if 'città' in job else '',
+            region = job['regione'] if 'regione' in job else '',
+            state = job['stato'] if 'stato' in job else '',
+            macro_region = job['macro_regione'] if 'macro_regione' in job else '',
+            work_mode = job['distanza'] if 'distanza' in job else '',
+            work_type = job['tipo_lavoro'] if 'tipo_lavoro' in job else '',
+            experience = job['livello_esperienza'] if 'livello_esperienza' in job else '',
+            job_sector = job['settore'] if 'settore' in job else '',
+            job_area = job['funzione_lavorativa'] if 'funzione_lavorativa' in job else '',
+            qualification = job['qualifica'] if 'qualifica' in job else ''
+        )
 
         try:
 
