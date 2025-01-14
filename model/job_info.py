@@ -1,36 +1,3 @@
-from typing import List, Dict
-
-
-class Field:
-    def __init__(self, name, required=False):
-        self.name = name
-        self.required = required
-
-    def __eq__(self, other):
-        if isinstance(other, Field):
-            return self.name == other.name
-        return NotImplemented
-
-    def __hash__(self):
-        return hash(self.name)
-
-class HardSkill(Field):
-    pass
-
-class Category(Field):
-    extended_name: str
-    hard_skills: List[HardSkill]
-
-    def __init__(self, name, extended_name, required=False):
-        super().__init__(name, required)
-        self.name = name
-        self.extended_name = extended_name
-
-
-class SoftSkill(Field):
-    pass
-
-
 job_sectors = {
     "sviluppo_software": (
         "Sviluppo Software",
@@ -112,36 +79,3 @@ job_soft_skills : list[str] = [
     'Capacità di Sintesi',
     'Decision Making',
 ]
-
-# Dizionari delle regioni
-nord_italia = {
-    "Valle d'Aosta",
-    "Piemonte",
-    "Liguria",
-    "Lombardia",
-    "Trentino-Alto Adige",
-    "Veneto",
-    "Friuli-Venezia Giulia",
-    "Emilia-Romagna"
-}
-
-centro_italia = {
-    "Toscana",
-    "Umbria",
-    "Marche",
-    "Lazio"
-}
-
-sud_italia = {
-    "Abruzzo",
-    "Molise",
-    "Campania",
-    "Puglia",
-    "Basilicata",
-    "Calabria"
-}
-
-isole = {
-    "Sicilia",
-    "Sardegna"
-}

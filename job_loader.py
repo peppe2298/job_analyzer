@@ -1,8 +1,8 @@
 import pandas as pd
 
-from job_examinator import State
-from model import SoftSkill, Category, job_sectors, nord_italia, centro_italia, sud_italia, isole
-from prompts import soft_skill_match
+from model.graph.state import SoftSkill, Category, State
+from model.job_info import job_sectors
+from model.regions import nord_italia, centro_italia, sud_italia, isole
 
 
 def separa_luogo(row) -> [str, str, str]:
