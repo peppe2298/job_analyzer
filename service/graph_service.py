@@ -1,6 +1,6 @@
 from langgraph.constants import END
 
-from model.agents.company.company_agent import CompanyAgent
+from model.agents.company.company_agent import CompanyAgent, ProcessedCompanies, Company
 from model.agents.job.check_job_agent import CheckCategoryAgent, CheckSkillAgent
 from model.agents.job.job_preprocess_agent import JobPreprocessAgent
 from model.graph.state import State, Category, HardSkill, SoftSkill
@@ -93,12 +93,22 @@ class GraphService:
 
     @staticmethod
     def check_company(state: State):
-        agent = CompanyAgent()
 
+        processed_companies = ProcessedCompanies()
+        company_name = state['company']
+
+        if company_name in processed_companies.get_data():
+            company = processed_companies.get_data().get(company_name)
+            return {'company_registered_office_state': company.country, 'company_sector': "",
+                'company_revenue': company.revenue}
+
+        agent = CompanyAgent()
         results = agent.invoke({'company_name': state['company']})
+        company = Company(country=results['country']['output'], revenue=results['revenue']['output'])
+        processed_companies.update_data(company_name, company)
 
         # return {'company_registered_office_state': results['nation'], 'company_sector': results['sectors'],
         #         'company_revenue': results['revenue']}
 
-        return {'company_registered_office_state': "", 'company_sector': "",
-                'company_revenue': results['revenue']}
+        return {'company_registered_office_state': company.country, 'company_sector': "",
+                'company_revenue': company.revenue}
