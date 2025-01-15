@@ -99,16 +99,13 @@ class GraphService:
 
         if company_name in processed_companies.get_data():
             company = processed_companies.get_data().get(company_name)
-            return {'company_registered_office_state': company.country, 'company_sector': "",
+            return {'company_registered_office_state': company.country, 'company_sector': company.sector,
                 'company_revenue': company.revenue}
 
         agent = CompanyAgent()
         results = agent.invoke({'company_name': state['company']})
-        company = Company(country=results['country']['output'], revenue=results['revenue']['output'])
+        company = Company(country=results['country']['output'], revenue=results['revenue']['output'], sector=results['sector']['output'])
         processed_companies.update_data(company_name, company)
 
-        # return {'company_registered_office_state': results['nation'], 'company_sector': results['sectors'],
-        #         'company_revenue': results['revenue']}
-
-        return {'company_registered_office_state': company.country, 'company_sector': "",
+        return {'company_registered_office_state': company.country, 'company_sector': company.sector,
                 'company_revenue': company.revenue}

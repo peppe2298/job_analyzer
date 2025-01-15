@@ -1,6 +1,6 @@
 from langchain.agents import initialize_agent, AgentType
 from langchain_community.tools import DuckDuckGoSearchResults
-from langchain_core.output_parsers import JsonOutputParser, PydanticOutputParser
+from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_core.tools import Tool
@@ -55,7 +55,7 @@ class CompanyHeadquarterCountryAgent(AbstractAgent):
             verbose=False
         )
 
-        starting_prompt = PromptTemplate.from_template("Restituisci SOLO il codice 'ISO 3166-1 alpha-3' della nazione dell'azienda {company_name}. Usa la query: Where is the country of the registered office of the company {company_name} located??")
+        starting_prompt = PromptTemplate.from_template("Restituisci SOLO il codice 'ISO 3166-1 alpha-3' della nazione dell'azienda {company_name}. Usa la query: Where is the country of the registered office of the company {company_name} located?")
 
         return starting_prompt | agent
 
@@ -99,7 +99,7 @@ class CountryExtractorAgent(AbstractAgent):
             prefix="Analizza il seguente testo e restituisci la nazione della sede legale dell'azienda nel formato 'ISO 3166-1 alpha-3'.\n"
                    "Se la nazione è scritta per esteso o in altri modi, convertila nel formato 'ISO 3166-1 alpha-3'.\n"
                    "il risultato può consistere SOLO nel codice della nazione trovata convertito nel formato 'ISO 3166-1 alpha-3' oppure 'N/A'.\n Di seguito alcuni esempi:\n\n",
-            suffix="Testo: {text}\n\nIl tuo output deve essereJSON",
+            suffix="Testo: {text}\n\nIl tuo output deve essere JSON",
             input_variables=["text"],
             example_separator="\n\n",
         )

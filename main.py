@@ -1,13 +1,15 @@
 import pandas as pd
 
-from job_loader import get_jobs, cast_job_to_serie
 from model.graph.graph import JobAnalyzerGraph
 from model.graph.state import State
+from service.job_services import JobServices
 
 
 def start_job_analyzer():
 
-    jobs = get_jobs()
+    jov_service = JobServices()
+
+    jobs = jov_service.get_jobs()
 
     job_analyzer = JobAnalyzerGraph()
     image = job_analyzer.generate_image()
@@ -37,7 +39,7 @@ def start_job_analyzer():
         try:
 
             result_state = job_analyzer.graph.invoke(result_state)
-            serie = cast_job_to_serie(result_state)
+            serie = jov_service.cast_job_to_serie(result_state)
             new_df = serie.to_frame().T
             jobs_elaborated = pd.concat([jobs_elaborated, new_df], ignore_index=True)
 
@@ -46,10 +48,9 @@ def start_job_analyzer():
 
         print(f'{index} lavori processati')
 
-        if (index % 10) == 0:
+        if (index % 2) == 0:
             jobs_elaborated.to_csv('jobs_elaborated.csv', index=False)
 
-    print(jobs_elaborated.head(10))
 
 
 
