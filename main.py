@@ -21,6 +21,8 @@ def start_job_analyzer():
 
         result_state = State(
             id = job['id'] if 'id' in job else '',
+            data_estrazione = job['data_estrazione'] if 'data_estrazione' in job else '',
+            data = job['data'] if 'data' in job else '',
             announce = job['dettaglio'] if 'dettaglio' in job else '',
             name = job['mansione'] if 'mansione' in job else '',
             company = job['azienda'] if 'azienda' in job else '',
@@ -48,7 +50,7 @@ def start_job_analyzer():
 
         print(f'{index} lavori processati')
 
-        if (index % 2) == 0:
+        if (index % 10) == 0:
             jobs_elaborated.to_csv('jobs_elaborated.csv', index=False)
 
 

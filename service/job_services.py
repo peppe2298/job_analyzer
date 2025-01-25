@@ -1,5 +1,7 @@
 import pandas as pd
 
+import os
+
 from model.graph.state import SoftSkill, Category, State
 from model.job_info import job_sectors
 from model.regions import nord_italia, centro_italia, sud_italia, isole
@@ -40,23 +42,42 @@ class JobServices:
     @staticmethod
     def get_jobs() -> pd.DataFrame:
 
-        df = pd.read_csv('jobs_scraping.csv')
+        # Sostituisci 'path/to/your/folder' con il percorso effettivo della tua cartella
+        cartella = 'jobs_csv'
 
-        df['mansione'] = df['mansione'].str.split('\n').str[0]
+        # Ottieni una lista di tutti i file CSV nella cartella
+        lista_csv = [f for f in os.listdir(cartella) if f.endswith('.csv')]
 
-        df['luogo'] = df['luogo'].str.replace(r'\(.*?\)', '', regex=True)
-        df[['città', 'regione', 'stato']] = df.apply(JobServices._separa_luogo, axis=1, result_type='expand')
-        df.drop('luogo', axis=1, inplace=True)
+        # Lista vuota per contenere i DataFrame
+        df_list = []
 
-        df['macro_regione'] = df.apply(JobServices._determina_macro_regione, axis=1)
+        for file in lista_csv:
+            # Crea il percorso completo del file
+            percorso_completo = os.path.join(cartella, file)
 
-        return df
+            # Leggi il file CSV in un DataFrame Pandas
+            df = pd.read_csv(percorso_completo)
+
+            # df = pd.read_csv('jobs_scraping.csv')
+
+            df['mansione'] = df['mansione'].str.split('\n').str[0]
+
+            df['luogo'] = df['luogo'].str.replace(r'\(.*?\)', '', regex=True)
+            df[['città', 'regione', 'stato']] = df.apply(JobServices._separa_luogo, axis=1, result_type='expand')
+            df.drop('luogo', axis=1, inplace=True)
+
+            df['macro_regione'] = df.apply(JobServices._determina_macro_regione, axis=1)
+
+            df_list.append(df)
+
+        return pd.concat(df_list, ignore_index=True)
 
     @staticmethod
     def cast_job_to_serie(job_state: State) -> pd.Series:
         serie: pd.Series = pd.Series()
 
         serie['id'] = job_state['id'] if 'id' in job_state else ''
+        serie['registration_date']= job_state['data'] if 'date' in job_state else ''
         serie['name'] = job_state['name'] if 'name' in job_state else ''
         serie['company'] = job_state['company'] if 'company' in job_state else ''
         serie['city'] = job_state['city'] if 'city' in job_state else ''

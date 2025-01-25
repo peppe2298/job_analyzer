@@ -38,6 +38,8 @@ class UpdateSetList:
 
 class State(TypedDict):
     id: str
+    data_estrazione: str
+    data: str
     name: str
     company: str
     company_sector: str #AI

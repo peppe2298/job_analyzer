@@ -30,12 +30,12 @@ class CompanySectorAgent(AbstractAgent):
             Tool(
                 name="DuckDuckGo Search",
                 func=self.search.run,
-                description="Utile per cercare informazioni su un'azienda, in particolare di cosa si occupa"
+                description="Useful for searching for information about a company, in particular what it does"
             ),
             Tool(
                 name="Sector Extractor",
                 func=self.extract_sector,
-                description="Utile per estrapolare il nome del settore in cui opera un azienda da un testo informativo"
+                description="Useful for extracting the name of the sector in which a company operates from an informational text"
             )
         ]
 
@@ -48,7 +48,7 @@ class CompanySectorAgent(AbstractAgent):
             verbose=False
         )
 
-        starting_prompt = PromptTemplate.from_template("Restituisci SOLO il nome del settore in cui opera l'azienda {company_name}. Usa la query: What does the company {company_name} do? What sector does it operate in?")
+        starting_prompt = PromptTemplate.from_template("Return ONLY the name of the industry in which the company {company_name} operates. Use the query: What does the company {company_name} do? What sector does it operate in?")
 
         return starting_prompt | agent
 
@@ -90,8 +90,8 @@ class SectorExtractorAgent(AbstractAgent):
 
         prefix = """
         
-        Analizza il seguente testo e restituisci il settore in cui opera l'azienda.
-        Il settore in cui opera l'azienda potrà essere SOLO uno di quelli presenti nella seguente lista:
+        Analyze the following text and return the sector in which the company operates.
+        The sector in which the company operates can ONLY be one of those present in the following list:
         
             - **Agricoltura, Industria e Ambiente** (Agricoltura, allevamento, e alimentazione, Produzione industriale e manifatturiera, Energie rinnovabili e gestione ambientale)
             - **Tecnologia e Innovazione** ( IT, sviluppo software e telecomunicazioni,  Intelligenza artificiale, data science e cybersecurity)
@@ -101,10 +101,10 @@ class SectorExtractorAgent(AbstractAgent):
             - **Educazione e Cultura** (Insegnamento, formazione e ricerca, Arte, cultura, media e intrattenimento)
             - **Pubblica Amministrazione e No Profit** (Organizzazioni governative, ONG e volontariato, Servizi pubblici e forze dell'ordine)
             
-        Se non corrisponde a nessuno di questi settori, semplicemente rispondi N/A.
-        Il risultato può consistere SOLO un uno dei settori elencati sopra oppure N/A.
+        If it does not match any of these areas, simply answer N/A.
+        The result can be ONLY one of the areas listed above or N/A.
         
-        Di seguito alcuni esempi:
+        Here some examples:
 
         """
 
@@ -113,7 +113,7 @@ class SectorExtractorAgent(AbstractAgent):
             examples=examples,
             example_prompt=example_prompt,
             prefix=prefix,
-            suffix="Testo: {text}\n\nIl tuo output:",
+            suffix="Text: {text}\n\nYour output:",
             input_variables=["text"],
             example_separator="\n\n",
         )

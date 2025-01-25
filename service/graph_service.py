@@ -1,7 +1,8 @@
 from langgraph.constants import END
 
+from model.agents.abstract.abstract_agent import AbstractAgent
 from model.agents.company.company_agent import CompanyAgent, ProcessedCompanies, Company
-from model.agents.job.check_job_agent import CheckCategoryAgent, CheckSkillAgent
+from model.agents.job.check_job_agent import CheckCategoryAgent, CheckSkillAgent, DateAgent
 from model.agents.job.job_preprocess_agent import JobPreprocessAgent
 from model.graph.state import State, Category, HardSkill, SoftSkill
 from model.job_info import job_sectors, job_soft_skills
@@ -109,3 +110,14 @@ class GraphService:
 
         return {'company_registered_office_state': company.country, 'company_sector': company.sector,
                 'company_revenue': company.revenue}
+
+    @staticmethod
+    def check_date(state: State):
+
+        unformatted_date = state['data']
+        extraction_date = state['data_estrazione']
+
+        agent = DateAgent()
+        result = agent.invoke({'extraction_date': extraction_date, 'unformatted_date': unformatted_date})
+
+        return {'data': result}

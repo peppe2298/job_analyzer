@@ -37,12 +37,12 @@ class CompanyHeadquarterCountryAgent(AbstractAgent):
             Tool(
                 name="DuckDuckGo Search",
                 func=self.search.run,
-                description="Utile per cercare informazioni sul sulla nazione della sede legale di un'azienda"
+                description="Useful for searching for information on the country of a company's registered office"
             ),
             Tool(
                 name="Country Extractor",
                 func=self.extract_country,
-                description="Utile per estrapolare il paese esatto in formato 'ISO 3166-1 alpha-3' della sede legale di un azienda da un testo"
+                description="Useful for extracting the exact country in 'ISO 3166-1 alpha-3' format of a company's registered office from a text"
             )
         ]
 
@@ -55,7 +55,7 @@ class CompanyHeadquarterCountryAgent(AbstractAgent):
             verbose=False
         )
 
-        starting_prompt = PromptTemplate.from_template("Restituisci SOLO il codice 'ISO 3166-1 alpha-3' della nazione dell'azienda {company_name}. Usa la query: Where is the country of the registered office of the company {company_name} located?")
+        starting_prompt = PromptTemplate.from_template("Return ONLY the 'ISO 3166-1 alpha-3' country code of the company {company_name}. Use the query: Where is the country of the registered office of the company {company_name} located?")
 
         return starting_prompt | agent
 
@@ -92,14 +92,23 @@ class CountryExtractorAgent(AbstractAgent):
             template="""Testo: {text}\nOutput: {output}\n"""
         )
 
+        prefix = """
+                    Parse the following text and return the country of the registered office of the company in 'ISO 3166-1 alpha-3' format.
+                    
+                    If the country is written out or otherwise, convert it to 'ISO 3166-1 alpha-3' format.
+                    
+                    The result can be ONLY the code of the found country converted to 'ISO 3166-1 alpha-3' format or 'N/A'.
+                    
+                    Here are some examples:
+                    
+                    """
+
         # Creazione del prompt Few-Shot
         few_shot_prompt = FewShotPromptTemplate(
             examples=examples,
             example_prompt=example_prompt,
-            prefix="Analizza il seguente testo e restituisci la nazione della sede legale dell'azienda nel formato 'ISO 3166-1 alpha-3'.\n"
-                   "Se la nazione è scritta per esteso o in altri modi, convertila nel formato 'ISO 3166-1 alpha-3'.\n"
-                   "il risultato può consistere SOLO nel codice della nazione trovata convertito nel formato 'ISO 3166-1 alpha-3' oppure 'N/A'.\n Di seguito alcuni esempi:\n\n",
-            suffix="Testo: {text}\n\nIl tuo output deve essere JSON",
+            prefix=prefix,
+            suffix="Text: {text}\n\nYour output must be a JSON",
             input_variables=["text"],
             example_separator="\n\n",
         )

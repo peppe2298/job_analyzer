@@ -33,16 +33,16 @@ class CompanyRevenueAgent(AbstractAgent):
             Tool(
                 name="DuckDuckGo Search",
                 func=self.search.run,
-                description="Utile per cercare informazioni sul fatturato di un'azienda"
+                description="Useful for searching for text containing information on a company's turnover"
             ),
             Tool(
                 name="Revenue Extractor",
                 func=self.extract_revenue,
-                description="Utile per estrapolare il valore esatto del fatturato di un azienda da un testo e passarlo in formato JSON"
+                description="Useful for extrapolating the exact value of a company's turnover from a text and passing it in JSON format"
             ),
             Tool(
                 name="ConvertToEuro",
-                description="Dato un JSON, converte un importo con valuta (ad esempio '1000000 USD') in euro e restituisce un numero intero positivo.",
+                description="Given a JSON, converts a currency amount (for example '1000000 USD') to euros if necessary and always returns an integer",
                 func=self.currency_converter.convert
             )
         ]
@@ -58,7 +58,13 @@ class CompanyRevenueAgent(AbstractAgent):
             parser=self.parser
         )
 
-        starting_prompt = PromptTemplate.from_template("Restituisci SOLO il fatturato dell'azienda {company_name} in euro come numero intero positivo. Usa la query: How much is the most recent global turnover of the company {company_name}?")
+        starting_prompt = PromptTemplate.from_template("""Return ONLY the revenue of the company {company_name} in euros as an integer. 
+        
+        Use the query: How much is the most recent global turnover of the company {company_name}?
+        
+        If you can't find out the company's revenue, just return 0.
+        
+        """)
 
         return starting_prompt | agent
 
@@ -99,10 +105,10 @@ class RevenueExtractorAgent(AbstractAgent):
         few_shot_prompt = FewShotPromptTemplate(
             examples=examples,
             example_prompt=example_prompt,
-            prefix="Analizza il seguente testo e restituisci il fatturato annuale più recente dell'azienda e la valuta associata.\n"
-                   "Se non trovi un fatturato chiaro, restituisci 0 per il fatturato e 'N/A' per la valuta.\n"
-                   "La valuta deve essere conforme al formato ISO 4217 o 'N/A'.\n Di seguito alcuni esempi:\n\n",
-            suffix="Testo: {text}\n\nIl tuo output deve essereJSON",
+            prefix="Parse the following text and return the company's most recent annual revenue and associated currency.\n"
+                   "If you don't find clear revenue, return 0 for revenue and 'N/A' for currency.\n"
+                   "The currency must conform to ISO 4217 or 'N/A' format.\n Here are some examples:\n\n",
+            suffix="Text: {text}\n\nYour output must be a JSON",
             input_variables=["text"],
             example_separator="\n\n",
         )

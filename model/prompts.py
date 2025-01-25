@@ -1,121 +1,92 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-# Prompt per l'analisi del contratto e livello
-contract_level_prompt = ChatPromptTemplate.from_template("""
-Analizza il seguente annuncio di lavoro. Identifica SOLO le informazioni ESPLICITAMENTE menzionate riguardo:
-
-1. Il tipo di contratto:
-   Cerca SOLO menzioni esplicite di:
-   - stage
-   - determinato
-   - indeterminato
-   NON dedurre il tipo di contratto da altri indizi.
-
-2. Il livello di esperienza, basato su:
-   - Junior: 0-2 anni di esperienza
-   - Mid-level: menzione esplicita di 3-5 anni di esperienza
-   - Senior: menzione esplicita di più di 5 anni di esperienza
-
-IMPORTANTE:
-- Inserisci una stringa vuota se l'informazione non è ESPLICITAMENTE menzionata
-- NON fare deduzioni o supposizioni
-- Se ci sono ambiguità, usa una stringa vuota
-
-Restituisci SOLO i due valori separati da virgola, senza altro testo.
-Esempi formato:
-- Se hai certezza di entrambi: indeterminato, senior
-- Se manca certezza sul contratto: , senior
-- Se manca certezza sul livello: indeterminato,
-- Se non hai certezze: ,
-
-Annuncio:
-{job_posting}
-""")
-
 # Prompt per l'estrazione delle skill non catalogate
 skills_prompt = ChatPromptTemplate.from_template("""
-Analizza il seguente annuncio di lavoro e mantieni solo le parti relative alle soft skill e hard skill richieste.
-Rimuovi tutte le altre informazioni non pertinenti come benefit aziendali, descrizione dell'azienda, etc.
-Mantieni la formattazione originale delle skill.
+Analyze the following job posting and keep only the parts related to the requested soft and hard skills.
+Remove all other irrelevant information such as company benefits, company description, etc.
+Keep the original formatting of the skills.
 
-Annuncio:
+Job posting:
 {job_posting}
 """)
 
 check_category_prompt = ChatPromptTemplate.from_template("""
-Settore da verificare: {category}
-Criteri per identificare il settore (indicatori da cercare nell'annuncio): {category_description}
 
-Testo dell'annuncio di lavoro da analizzare:
+Analyze whether the indicators specified in the criteria are present in the job posting.
+
+Respond ONLY with:
+- True: if the Job posting contains the indicators of the industry
+- False: if the Job posting does not contain the indicators of the industry
+
+Industry to check: {category}
+Criteria to identify the industry (indicators to look for in the Job posting): {category_description}
+
+Job posting text to analyze:
 {job_posting}
 
-Analizza se nell'annuncio sono presenti gli indicatori specificati nei criteri.
-Rispondi SOLO con:
-- True: se l'annuncio contiene gli indicatori del settore
-- False: se l'annuncio non contiene gli indicatori del settore
 """)
 
 hard_skill_match = ChatPromptTemplate.from_template("""
-Analizza il seguente annuncio di lavoro e identifica quali delle skill fornite sono richieste.
-IMPORTANTE: Se trovi una skill richiesta che ha un nome diverso ma si riferisce alla stessa tecnologia presente nella lista fornita, 
-devi restituire il nome ESATTO presente nella lista di input.
+Review the following job posting and identify which of the skills provided are required.
+IMPORTANT: If you find a required skill that has a different name but refers to the same technology as the list provided,
+you must return the EXACT name from the input list.
 
-Ad esempio:
-- Se nella lista c'è "React.js" e nell'annuncio trovi "React" o "ReactJS", restituisci "React.js"
-- Se nella lista c'è "MySQL" e nell'annuncio trovi "SQL", restituisci "MySQL" solo se è chiaro che si riferisce specificamente a MySQL
+For example:
+- If the list says "React.js" and the posting says "React" or "ReactJS", return "React.js"
+- If the list says "MySQL" and the posting says "SQL", return "MySQL" only if it is clear that it refers specifically to MySQL
 
-Restituisci SOLO le skill richieste, una per riga.
-Se una skill non è menzionata o non è chiaramente richiesta, non includerla.
+Return ONLY the required skills, one per line.
+If a skill is not mentioned or is not clearly required, do not include it.
 
-Annuncio di lavoro:
+Job Posting:
 {job_description}
 
-Lista delle skill da verificare (usa ESATTAMENTE questi nomi):
+List of skills to verify (use EXACTLY these names):
 {skills}
 
-Skill richieste (una per riga):
+Required skills (one per line):
 """)
 
 soft_skill_match = ChatPromptTemplate.from_template("""
-Analizza il seguente annuncio di lavoro e identifica quali delle soft skill fornite sono richieste.
-IMPORTANTE: Se trovi una skill richiesta che ha un nome diverso ma si riferisce alla stessa tecnologia presente nella lista fornita, 
-devi restituire il nome ESATTO presente nella lista di input.
+Review the following job posting and identify which of the provided soft skills are required.
+IMPORTANT: If you find a required skill that has a different name but refers to the same technology as the list provided,
+you must return the EXACT name from the input list.
 
-Ad esempio:
-- Se nella lista c'è "Leadership e Influenza" e nell'annuncio trovi "Capacità di influenzare gli altri" o "possesso di leadership", restituisci "React.js"
-- Se nella lista c'è "Team Collaboration e Teamwork" e nell'annuncio trovi "Capacità di lavorare in team", restituisci "Team Collaboration e Teamwork"
+For example:
+- If the list says "Leadership and Influence" and the posting says "Ability to influence others" or "possession of leadership", return "React.js"
+- If the list says "Team Collaboration and Teamwork" and the posting says "Ability to work in a team", return "Team Collaboration and Teamwork"
 
-Restituisci SOLO le skill richieste, una per riga.
-Se una skill non è chiaramente richiesta, non includerla.
+Return ONLY the required skills, one per line.
+If a skill is not clearly required, do not include it.
 
-Annuncio di lavoro:
+Job Posting:
 {job_description}
 
-Lista delle soft skill da verificare (usa ESATTAMENTE questi nomi):
+List of soft skills to verify (use EXACTLY these names):
 {skills}
 
-Skill richieste (una per riga):
+Required skills (one per line):
 """)
 
 ral_prompt = ChatPromptTemplate.from_template("""
-Dato il seguente annuncio di lavoro, calcola la RAL (Retribuzione Annua Lorda) seguendo queste regole:
-1. **Range di valori**: Se è presente un range (esempio: "25.000-30.000€"), calcola la media e restituisci un numero intero.
-2. **Valore unico**: Se è indicato un valore singolo (esempio: "35.000€"), restituisci quel valore come intero.
-3. **Retribuzione mensile**: Se è presente una retribuzione mensile (esempio: "1.500€ al mese"), calcola la RAL moltiplicando per 14 (14 mensilità) e restituisci il risultato come intero.
-4. **Nessun valore**: Se non trovi alcuna indicazione relativa alla RAL o alla retribuzione, restituisci `0`.
+Given the following job posting, calculate the RAL (Gross Annual Salary) following these rules:
+1. **Range of values**: If there is a range (example: "25,000-30,000€"), calculate the average and return an integer.
+2. **Single value**: If a single value is given (example: "35,000€"), return that value as an integer.
+3. **Monthly salary**: If there is a monthly salary (example: "1,500€ per month"), calculate the RAL by multiplying by 14 (14 monthly payments) and return the result as an integer.
+4. **No value**: If there is no indication of RAL or salary, return `0`.
 
-Assicurati che l'output sia **solo un numero intero**, senza spiegazioni aggiuntive.
+Make sure the output is **just an integer**, without additional explanations.
 
-**Esempi**:
-1. Input: "L'azienda X ricerca un Data Scientist. Offriamo una RAL compresa tra 25.000€ e 30.000€ in base all'esperienza."
-   Output: 27500
-2. Input: "L'azienda Y cerca un Web Developer con una retribuzione mensile di 1.800€."
-   Output: 25200
-3. Input: "L'azienda Z cerca un Project Manager. Ottime prospettive di crescita."
-   Output: 0
+**Examples**:
+1. Input: "Company X is looking for a Data Scientist. We offer a salary between €25,000 and €30,000 based on experience."
+Output: 27500
+2. Input: "Company Y is looking for a Web Developer with a monthly salary of €1,800."
+Output: 25200
+3. Input: "Company Z is looking for a Project Manager. Excellent growth prospects."
+Output: 0
 
-**Annuncio**: {job_posting}
+**Job posting**: {job_posting}
 
-**Risultato**:
+**Result**:
 """
 )

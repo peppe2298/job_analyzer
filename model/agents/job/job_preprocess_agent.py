@@ -30,9 +30,9 @@ class SkillSummarizerAgent(AbstractAgent):
 
 
 class RALOutput(BaseModel):
-    ral: int = Field(description="RAL annuale lorda in euro. 0 se non presente.")
-    net_monthly: float = Field(description="Stipendio netto mensile in euro, se presente. 0 altrimenti.")
-    confidence: float = Field(description="Confidenza dell'estrazione da 0 a 1")
+    ral: int = Field(description="Gross annual RAL in euros. 0 if not present.")
+    net_monthly: float = Field(description="Monthly net salary in euros, if any. 0 otherwise.")
+    confidence: float = Field(description="Extraction confidence from 0 to 1")
 
 
 class RalExtractorAgent(AbstractAgent):
@@ -79,19 +79,19 @@ class RalExtractorAgent(AbstractAgent):
         )
 
         # Template principale
-        prefix = """Analizza il seguente annuncio di lavoro ed estrai le informazioni relative alla retribuzione.
-        Se è presente la RAL (Retribuzione Annua Lorda), estraila direttamente.
-        Se è presente un range (esempio: "25.000-30.000€"), restituisci la media tra i vari valori
-        Se è presente solo lo stipendio netto mensile, segnalalo e estrai il valore.
-        Se non sono presenti informazioni sulla retribuzione, ritorna 0 come RAL.
+        prefix = """Analyze the following job advertisement and extract the salary information.
+        If the RAL (Gross Annual Salary) is present, extract it directly.
+        If there is a range (example: "25,000-30,000€"), return the average between the various values
+        If only the monthly net salary is present, report it and extract the value.
+        If there is no salary information, return 0 as RAL.
+        
+        The result must be in JSON format with the fields: ral, net_monthly, trust
 
-        Il risultato deve essere in formato JSON con i campi: ral, net_monthly, confidence
+        Here some examples:"""
 
-        Ecco alcuni esempi:"""
+        suffix = """Announce: {job_posting}
 
-        suffix = """Annuncio: {job_posting}
-
-        Output in formato JSON:"""
+        Output must be a JSON:"""
 
         # Creazione del few-shot prompt template
         few_shot_prompt = FewShotPromptTemplate(

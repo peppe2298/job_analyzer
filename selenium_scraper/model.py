@@ -72,6 +72,41 @@ QUALIFICA = {
 }
 
 
+#
+#
+# filtri_linkedin = {
+#     "Posizione": ["Codice postale", "Città", "Stato/provincia", "Paese"],
+#     "Data di Pubblicazione": ["Ultime 24 ore", "Ultima settimana", "Ultimo mese"],
+#     "Easy Apply": ["Sì", "No"],
+#     "Azienda": ["Nomi specifici delle aziende"],
+#     "Livello di Esperienza": ["Entry-level", "Mid-level", "Senior-level", "Executive-level"],
+#     "Tipo di Lavoro": ["Tempo pieno", "Contratto", "Stage", "Part-time"],
+#     "Industria": [
+#         "Agricoltura", "Automotive", "Bancario e Finanziario", "Costruzioni", "Beni di Consumo", "Istruzione", "Energia e Miniere",
+#         "Ingegneria", "Intrattenimento", "Ambiente e Sostenibilità", "Governo", "Sanità", "Ospitalità",
+#         "Risorse Umane", "Tecnologia dell'Informazione", "Assicurazioni", "Legale", "Produzione", "Marketing e Pubblicità",
+#         "Media e Comunicazioni", "Non profit", "Farmaceutici", "Immobiliare", "Vendita al Dettaglio", "Scienze", "Sicurezza",
+#         "Telecomunicazioni", "Trasporti e Logistica", "Viaggi"
+#     ],
+#     "Funzione Lavorativa": [
+#         "Contabilità e Finanza", "Amministrazione e Segreteria", "Pubblicità e PR", "Aeroespaziale e Difesa", "Agricoltura e Silvicoltura",
+#         "Architettura e Ingegneria", "Arti e Intrattenimento", "Automotive e Produzione", "Bancario e Finanziario", "Biotecnologie e Farmaceutici",
+#         "Sviluppo Commerciale", "Business Intelligence", "Chimico", "Ingegneria Civile e Strutturale", "Consulenza", "Servizio Clienti",
+#         "Dati e Analitica", "Design", "Istruzione e Formazione", "Ingegneria e Costruzioni", "Servizi Ambientali", "Eventi e Conferenze",
+#         "Manutenzione e Strutture", "Cibo e Bevande", "Amministrazione Pubblica e Governo", "Sanità e Medicina", "Risorse Umane",
+#         "Tecnologia dell'Informazione", "Assicurazioni", "Legale", "Logistica e Supply Chain", "Marketing e Comunicazioni", "Media e Editoria",
+#         "Non profit e ONG", "Gestione Operazioni", "Altro", "Farmaceutici e Biotecnologie", "Approvvigionamento e Acquisti",
+#         "Gestione del Prodotto", "Gestione Progetti", "Assicurazione Qualità", "Immobiliare", "Ricerca e Sviluppo", "Vendite",
+#         "Scienze e Ingegneria", "Sicurezza e Investigazioni", "Sviluppo Software", "Supply Chain e Logistica", "Telecomunicazioni",
+#         "Turismo e Ospitalità", "Trasporti e Logistica", "Utilities"
+#     ],
+#     "Verificato": ["Sì", "No"],
+#     "Meno di 10 Candidati": ["Sì", "No"],
+#     "Nella Tua Rete": ["Sì", "No"],
+#     "Datori di Lavoro Opportunità Giuste (Solo US)": ["Sì", "No"]
+# }
+
+
 class JobListing:
     def __init__(self, link , **kwargs):
         """

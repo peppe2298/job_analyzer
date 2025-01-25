@@ -93,6 +93,7 @@ def do_page_scrape(driver, lista_lavori_per_pagina, df, job):
             wait_dettaglio = WebDriverWait(driver, 10)
             # Aspettiamo e prendiamo il dettaglio da tutta la pagina
             dettaglio = wait_dettaglio.until(EC.presence_of_element_located((By.CLASS_NAME, "jobs-description__container"))).text
+            data_annuncio = wait_dettaglio.until(EC.presence_of_element_located((By.CLASS_NAME, "job-details-jobs-unified-top-card__primary-description-container"))).text
 
             print('dettaglio estratto')
 
@@ -106,6 +107,7 @@ def do_page_scrape(driver, lista_lavori_per_pagina, df, job):
             # Creiamo una nuova riga come Series e la aggiungiamo al DataFrame
             nuova_riga = pd.Series({
                 'id': current_job_id,
+                'data': data_annuncio,
                 'mansione': mansione,
                 'azienda': azienda,
                 'luogo': luogo,
@@ -147,7 +149,7 @@ def click_next_page(driver) -> bool:
 def linkedin_job_scraper(job: JobListing, driver: WebDriver):
 
 
-    df = pd.DataFrame(columns=['id', 'mansione', 'azienda', 'luogo', 'distanza', 'tipo_lavoro', 'livello_esperienza', 'dettaglio', 'settore', 'funzione_lavorativa', 'qualifica'])
+    df = pd.DataFrame(columns=['id', 'data', 'mansione', 'azienda', 'luogo', 'distanza', 'tipo_lavoro', 'livello_esperienza', 'dettaglio', 'settore', 'funzione_lavorativa', 'qualifica'])
 
     driver.implicitly_wait(10)
     driver.get(job.link)
@@ -156,7 +158,7 @@ def linkedin_job_scraper(job: JobListing, driver: WebDriver):
     job_results = driver.find_element(By.CLASS_NAME, 'jobs-search-results-list__subtitle')
     job_results = job_results.text.replace(' risultati', '')
     job_results = pd.to_numeric(job_results)
-    print(job_results)
+    print(f'RISULTATI: {job_results}')
 
     current_page = driver.find_element(By.CLASS_NAME, 'jobs-search-pagination__indicator-button--active').text
     current_page = pd.to_numeric(current_page)
@@ -164,9 +166,10 @@ def linkedin_job_scraper(job: JobListing, driver: WebDriver):
 
     next_page_clicked = True
     paginazione = driver.find_element(By.CLASS_NAME, 'jobs-search-pagination')
+    footer = driver.find_element(By.ID, 'jobs-search-results-footer')
 
     while next_page_clicked:
-        lista_lavori_per_pagina = paginazione.find_element(By.XPATH, "./preceding-sibling::ul[1]")
+        lista_lavori_per_pagina = footer.find_element(By.XPATH, "./preceding-sibling::ul[1]")
         do_page_scrape(driver, lista_lavori_per_pagina, df, job)
         next_page_clicked = click_next_page(driver)
 
@@ -180,8 +183,21 @@ def linkedin_job_scraper(job: JobListing, driver: WebDriver):
 def create_job_list() -> list[JobListing]:
     job_lists: list[JobListing] = []
 
-    # job_lists.append(JobListing('https://www.linkedin.com/jobs/search/?currentJobId=4085168619&f_E=1&f_TPR=r86400&geoId=103350119&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true', livello_esperrienza=1))
-    job_lists.append(JobListing('https://www.linkedin.com/jobs/search/?currentJobId=4094512773&f_C=1073&f_PP=101085706&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R'))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4120394097&f_F=anls&f_I=4&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
+        settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4083382926&f_I=96&f_T=340&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
+        settore=SETTORE.get(1), qualifica=QUALIFICA.get(6)))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4120832106&f_F=it&f_I=4&f_WT=1&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
+        distanza=DISTANZA.get(1), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4073720176&f_F=it&f_I=4&f_WT=3&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
+        distanza=DISTANZA.get(2), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4081124077&f_F=it&f_I=4&f_WT=2&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
+        distanza=DISTANZA.get(3), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
 
     return job_lists
 
@@ -210,7 +226,7 @@ if __name__ == '__main__':
             linkedin_job_scraper(job_detail, web_driver)
             print('Scraping completato!')
         except Exception as e:
-            print('Scraping fallito')
+            print(f'Scraping fallito: {e} \n')
 
     # while True:
     #     user_input = input("Inserisci URL di scraping: ")

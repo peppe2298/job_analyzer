@@ -24,10 +24,10 @@ class JobAnalyzerGraph:
 
         # CREAZIONE DEI NODI
 
-        builder.add_node("preprocess_level", self.gs.preprocess_job)
-
         builder.add_node("check_company", self.gs.check_company)
+        builder.add_node("check_date", self.gs.check_company)
 
+        builder.add_node("preprocess_level", self.gs.preprocess_job)
         builder.add_node("check_soft_skill", self.gs.check_soft_skill)
 
         builder.add_node("check_category_sistemi", lambda s: self.gs.check_category(s, 'sistemi'))
@@ -46,13 +46,16 @@ class JobAnalyzerGraph:
 
         # CREAZIONE DEI COLLEGAMENTI
 
+        builder.add_edge(START, 'check_company')
+        builder.add_edge("check_company", END)
+
+        builder.add_edge(START, 'check_date')
+        builder.add_edge("check_date", END)
+
         builder.add_edge(START, "preprocess_level")
 
         builder.add_edge('preprocess_level', 'check_soft_skill')
         builder.add_edge("check_soft_skill", END)
-
-        builder.add_edge('preprocess_level', 'check_company')
-        builder.add_edge("check_company", END)
 
         builder.add_edge('preprocess_level', 'check_category_sistemi')
         builder.add_edge('preprocess_level', 'check_category_database')
