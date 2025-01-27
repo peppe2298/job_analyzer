@@ -2,7 +2,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_core.output_parsers import JsonOutputParser, PydanticOutputParser
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.tools import Tool
 from pydantic import BaseModel, Field
 
@@ -21,6 +21,7 @@ class CompanyRevenueAgent(AbstractAgent):
         super().__init__(**kwargs)
 
     def extract_revenue(self, text):
+        print(text)
         return self.revenue_extractor_agent.invoke({'text': text})
 
     def make_runnable(self, **kwargs) -> Runnable:
@@ -53,16 +54,23 @@ class CompanyRevenueAgent(AbstractAgent):
             tools,
             self.llm,
             agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=False,
-            handle_parsing_errors=True,
+            verbose=True,
             parser=self.parser
         )
 
         starting_prompt = PromptTemplate.from_template("""Return ONLY the revenue of the company {company_name} in euros as an integer. 
         
-        Use the query: How much is the most recent global turnover of the company {company_name}?
+        Start using the following search query: How much is the most recent global turnover of the company {company_name}?
         
-        If you can't find out the company's revenue, just return 0.
+        if You can't find the revenue, replace the  search result with 'there are no enough informations'.
+        
+        Then extract the revenue from the search result using the revenue extractor.
+        
+        Finally use ConvertToEuro to cast the currency if needed and return an integer
+        
+        If you can't find the company's revenue, RETURN 0.
+        
+        Your output MUST be an integer
         
         """)
 
@@ -113,4 +121,8 @@ class RevenueExtractorAgent(AbstractAgent):
             example_separator="\n\n",
         )
 
-        return few_shot_prompt | self.llm | self.parser
+        def debug(x):
+            print(x)
+            return x
+
+        return few_shot_prompt | self.llm | RunnableLambda(debug) | self.parser

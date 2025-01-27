@@ -25,7 +25,7 @@ class JobAnalyzerGraph:
         # CREAZIONE DEI NODI
 
         builder.add_node("check_company", self.gs.check_company)
-        builder.add_node("check_date", self.gs.check_company)
+        builder.add_node("check_date", self.gs.check_date)
 
         builder.add_node("preprocess_level", self.gs.preprocess_job)
         builder.add_node("check_soft_skill", self.gs.check_soft_skill)

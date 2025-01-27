@@ -91,7 +91,7 @@ class RalExtractorAgent(AbstractAgent):
 
         suffix = """Announce: {job_posting}
 
-        Output must be a JSON:"""
+        Output format instructions: {format_instructions}"""
 
         # Creazione del few-shot prompt template
         few_shot_prompt = FewShotPromptTemplate(
@@ -100,6 +100,7 @@ class RalExtractorAgent(AbstractAgent):
             prefix=prefix,
             suffix=suffix,
             input_variables=["job_posting"],
+            partial_variables={"format_instructions": self.parser.get_format_instructions()},
             example_separator="\n\n"
         )
 

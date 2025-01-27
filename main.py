@@ -38,15 +38,15 @@ def start_job_analyzer():
             qualification = job['qualifica'] if 'qualifica' in job else ''
         )
 
-        try:
+        # try:
 
-            result_state = job_analyzer.graph.invoke(result_state)
-            serie = jov_service.cast_job_to_serie(result_state)
-            new_df = serie.to_frame().T
-            jobs_elaborated = pd.concat([jobs_elaborated, new_df], ignore_index=True)
+        result_state = job_analyzer.graph.invoke(result_state)
+        serie = jov_service.cast_job_to_serie(result_state)
+        new_df = serie.to_frame().T
+        jobs_elaborated = pd.concat([jobs_elaborated, new_df], ignore_index=True)
 
-        except Exception as e:
-            print(f'Lavoro {job["id"]} non importato: {str(e)}\n')
+        # except Exception as e:
+        #     print(f'Lavoro {job["id"]} non importato: {e}\n')
 
         print(f'{index} lavori processati')
 

@@ -81,16 +81,13 @@ class GraphService:
         return {'soft_skills': soft_skills}
 
     @staticmethod
-    def preprocess_job(state: State) -> State:
+    def preprocess_job(state: State):
         """Nodo iniziale che processa lo stato in ingresso e apporta le modifiche comuni a tutte le categorie"""
 
         agent =  JobPreprocessAgent()
         result = agent.invoke({'job_posting': state['announce']})
 
-        state['summarized_announce'] = result["skills"]
-        state['ral'] = result["ral"]
-
-        return state
+        return {'summarized_announce':  result["skills"], 'ral': result["ral"]}
 
     @staticmethod
     def check_company(state: State):
@@ -107,7 +104,7 @@ class GraphService:
         results = agent.invoke({'company_name': state['company']})
         company = Company(country=results['country']['output'], revenue=results['revenue']['output'], sector=results['sector']['output'])
         processed_companies.update_data(company_name, company)
-
+        print(company.country)
         return {'company_registered_office_state': company.country, 'company_sector': company.sector,
                 'company_revenue': company.revenue}
 

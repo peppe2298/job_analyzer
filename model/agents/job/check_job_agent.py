@@ -34,21 +34,28 @@ class ResultDate(BaseModel):
 class DateAgent(AbstractAgent):
 
     def __init__(self, **kwargs):
-        self.parser = PydanticOutputParser(ResultDate)
+        self.parser = PydanticOutputParser(pydantic_object=ResultDate)
         super().__init__(**kwargs)
 
     def make_runnable(self) -> Runnable:
 
-        prompt = PromptTemplate.from_template("""your goal is to find out when the job announce was posted
-        
-        You will have the extraction day and a little text explaining how many time has passed from the posting day to the extraction day.
-        
-        this is the extraction date: {extraction_date}
-        
-        this is the text explaining how many time has passed from the posting day to the extraction date: {unformatted_date}
-        
-        Output: the date when the job announce was posted
-        
-        """)
+        prompt = PromptTemplate(
+            template="""your goal is to find out when the job announce was posted
+            
+            You will have the extraction day and a little text explaining how many time has passed from the posting day to the extraction day.
+            
+            this is the extraction date: {extraction_date}
+            
+            this is the text explaining how many time has passed from the posting day to the extraction date: {unformatted_date}
+            
+            Output: the date when the job announce was posted
+            
+            Format instructions: {format_instructions} 
+            
+            """,
+            input_variables=['extraction_date', 'unformatted_date'],
+            partial_variables={"format_instructions": self.parser.get_format_instructions()},
+
+        )
 
         return prompt | self.llm | self.parser | (lambda x: x.date.isoformat())
