@@ -54,7 +54,8 @@ class CompanyRevenueAgent(AbstractAgent):
             tools,
             self.llm,
             agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=True,
+            verbose=False,
+            handle_parsing_errors=True,
             parser=self.parser
         )
 
@@ -62,7 +63,7 @@ class CompanyRevenueAgent(AbstractAgent):
         
         Start using the following search query: How much is the most recent global turnover of the company {company_name}?
         
-        if You can't find the revenue, replace the  search result with 'there are no enough informations'.
+        if You can't find the revenue, replace the  search result with 'there aren't enough infos'.
         
         Then extract the revenue from the search result using the revenue extractor.
         
@@ -70,7 +71,9 @@ class CompanyRevenueAgent(AbstractAgent):
         
         If you can't find the company's revenue, RETURN 0.
         
-        Your output MUST be an integer
+        Your Final Answer output MUST be a NUMBER, no more.
+        
+        DO NOT ask me if i have other questions.
         
         """)
 
@@ -101,6 +104,10 @@ class RevenueExtractorAgent(AbstractAgent):
             {
                 "text": """Non ci sono informazioni sul fatturato nel testo.""",
                 "output": """{{"revenue": 0, "currency": "N/A"}}"""
+            },
+            {
+                "text": """ """,
+                "output": """{{"revenue": 0, "currency": "N/A"}}"""
             }
         ]
 
@@ -115,6 +122,7 @@ class RevenueExtractorAgent(AbstractAgent):
             example_prompt=example_prompt,
             prefix="Parse the following text and return the company's most recent annual revenue and associated currency.\n"
                    "If you don't find clear revenue, return 0 for revenue and 'N/A' for currency.\n"
+                   "If the text is empty, return 0 for revenue and 'N/A' for currency.\n"
                    "The currency must conform to ISO 4217 or 'N/A' format.\n Here are some examples:\n\n",
             suffix="Text: {text}\n\nYour output must be a JSON",
             input_variables=["text"],

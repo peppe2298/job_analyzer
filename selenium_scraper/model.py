@@ -40,7 +40,7 @@ SETTORE = {
 }
 
 FUNZIONE_LAVORATIVA = {
-    1: "Vendite",
+    1: "Analista",
     2: "Informatica",
     3: "Altro",
     4: "Business Development",
@@ -56,9 +56,9 @@ FUNZIONE_LAVORATIVA = {
 
 QUALIFICA = {
     1: "Software Engineer",
-    2: "Venditore",
-    3: "Addetto d'ambasciata",
-    4: "Project Manager",
+    2: "Data specialist",
+    3: "Artificial Intelligence Engineer",
+    4: "Business Analyst",
     5: "Tecnico",
     6: "Contabile",
     7: "Operaio",

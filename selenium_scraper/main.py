@@ -6,6 +6,7 @@ from pandas import DataFrame
 
 # Import Packages
 from selenium import webdriver
+from datetime import datetime
 import time
 import datetime
 import pandas as pd
@@ -97,16 +98,17 @@ def do_page_scrape(driver, lista_lavori_per_pagina, df, job):
 
             print('dettaglio estratto')
 
-            distanza = DISTANZA[job.distanza] if job.distanza is not None else caratteristiche[0] if caratteristiche.__len__() == 3 else None
-            tipo_lavoro  = TIPO_LAVORO[job.tipo_lavoro] if job.tipo_lavoro is not None else caratteristiche[1] if caratteristiche.__len__() == 3 else None
-            livello_esperienza = LIVELLO_ESPERIENZA[job.livello_esperienza] if job.livello_esperienza is not None else caratteristiche[2] if caratteristiche.__len__() == 3 else None
-            settore = SETTORE[job.settore] if job.settore is not None else None
-            funzione_lavorativa = FUNZIONE_LAVORATIVA[job.funzione_lavorativa] if job.funzione_lavorativa is not None else None
-            qualifica = QUALIFICA[job.qualifica] if job.qualifica is not None else None
+            distanza = job.distanza if job.distanza is not None else caratteristiche[0] if caratteristiche.__len__() == 3 else None
+            tipo_lavoro  = job.tipo_lavoro if job.tipo_lavoro is not None else caratteristiche[1] if caratteristiche.__len__() == 3 else None
+            livello_esperienza = job.livello_esperienza if job.livello_esperienza is not None else caratteristiche[2] if caratteristiche.__len__() == 3 else None
+            settore = job.settore if job.settore is not None else None
+            funzione_lavorativa = job.funzione_lavorativa if job.funzione_lavorativa is not None else None
+            qualifica = job.qualifica if job.qualifica is not None else None
 
             # Creiamo una nuova riga come Series e la aggiungiamo al DataFrame
             nuova_riga = pd.Series({
                 'id': current_job_id,
+                'data_estrazione':datetime.datetime.now().isoformat(),
                 'data': data_annuncio,
                 'mansione': mansione,
                 'azienda': azienda,
@@ -149,7 +151,7 @@ def click_next_page(driver) -> bool:
 def linkedin_job_scraper(job: JobListing, driver: WebDriver):
 
 
-    df = pd.DataFrame(columns=['id', 'data', 'mansione', 'azienda', 'luogo', 'distanza', 'tipo_lavoro', 'livello_esperienza', 'dettaglio', 'settore', 'funzione_lavorativa', 'qualifica'])
+    df = pd.DataFrame(columns=['id', 'data_estrazione', 'data', 'mansione', 'azienda', 'luogo', 'distanza', 'tipo_lavoro', 'livello_esperienza', 'dettaglio', 'settore', 'funzione_lavorativa', 'qualifica'])
 
     driver.implicitly_wait(10)
     driver.get(job.link)
@@ -184,20 +186,27 @@ def create_job_list() -> list[JobListing]:
     job_lists: list[JobListing] = []
 
     job_lists.append(JobListing(
-        'https://www.linkedin.com/jobs/search/?currentJobId=4120394097&f_F=anls&f_I=4&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
-        settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+        'https://www.linkedin.com/jobs/search/?currentJobId=4103709883&f_F=it&f_I=96&f_T=1547&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R', settore=1, funzione_lavorativa=2, qualifica=2))
     job_lists.append(JobListing(
-        'https://www.linkedin.com/jobs/search/?currentJobId=4083382926&f_I=96&f_T=340&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
-        settore=SETTORE.get(1), qualifica=QUALIFICA.get(6)))
+        'https://www.linkedin.com/jobs/search/?currentJobId=3837860335&f_F=it&f_I=4&f_T=1547&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=6, funzione_lavorativa=2, qualifica=2))
     job_lists.append(JobListing(
-        'https://www.linkedin.com/jobs/search/?currentJobId=4120832106&f_F=it&f_I=4&f_WT=1&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
-        distanza=DISTANZA.get(1), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+        'https://www.linkedin.com/jobs/search/?currentJobId=4110055395&f_F=it&f_I=96&f_T=30128&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=2, qualifica=3))
     job_lists.append(JobListing(
-        'https://www.linkedin.com/jobs/search/?currentJobId=4073720176&f_F=it&f_I=4&f_WT=3&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
-        distanza=DISTANZA.get(2), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+        'https://www.linkedin.com/jobs/search/?currentJobId=4115275247&f_F=anls&f_I=4&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=6, funzione_lavorativa=1, qualifica=1))
     job_lists.append(JobListing(
-        'https://www.linkedin.com/jobs/search/?currentJobId=4081124077&f_F=it&f_I=4&f_WT=2&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R',
-        distanza=DISTANZA.get(3), settore=SETTORE.get(6), funzione_lavorativa=FUNZIONE_LAVORATIVA.get(2)))
+        'https://www.linkedin.com/jobs/search/?currentJobId=4050240968&f_E=1&f_F=it&f_I=96&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=2, qualifica=1))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4122800803&f_E=2&f_F=it&f_I=96&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=2, qualifica=1))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4124570587&f_E=3&f_F=it&f_I=96&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=2, qualifica=1))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4093652840&f_E=4&f_F=it&f_I=96&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=2, qualifica=1))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4104158711&f_F=cnsl&f_I=96&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=8, qualifica=1))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4115989013&f_F=anls&f_I=96&f_T=29&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=1, funzione_lavorativa=1, qualifica=4))
+    job_lists.append(JobListing(
+        'https://www.linkedin.com/jobs/search/?currentJobId=4066141351&f_F=it&f_I=43&f_T=9&origin=JOB_SEARCH_PAGE_JOB_FILTER&sortBy=R&spellCorrectionEnabled=true', settore=11, funzione_lavorativa=2, qualifica=1))
 
     return job_lists
 

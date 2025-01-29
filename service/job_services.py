@@ -77,7 +77,7 @@ class JobServices:
         serie: pd.Series = pd.Series()
 
         serie['id'] = job_state['id'] if 'id' in job_state else ''
-        serie['registration_date']= job_state['data'] if 'date' in job_state else ''
+        serie['registration_date']= job_state['data'] if 'data' in job_state else ''
         serie['name'] = job_state['name'] if 'name' in job_state else ''
         serie['company'] = job_state['company'] if 'company' in job_state else ''
         serie['city'] = job_state['city'] if 'city' in job_state else ''
